@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Violence Detection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center p-5">
+  <h1 class="text-3xl font-bold mb-4">Violence Detection</h1>
+
+  <!-- Screen reader live region -->
+  <div id="sr-live" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Top alert chip (kept) -->
+  <div id="alert" class="hidden text-center p-3 rounded-lg bg-red-600 text-white text-xl font-bold mb-4 animate-pulse">
+    🚨 Violence Detected! 🚨
+  </div>
+
+  <!-- Siren sound -->
+  <audio id="siren" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+
+  <!-- Hidden video feed for capture -->
+  <video id="video" autoplay playsinline muted class="absolute opacity-0"></video>
+
+  <!-- Display processed video -->
+  <canvas id="canvas" class="rounded-lg shadow-lg w-full max-w-5xl aspect-video"></canvas>
+
+  <!-- FULL-SCREEN OVERLAY -->
+  <div id="overlay"
+       class="hidden fixed inset-0 z-50 bg-red-700/70 backdrop-blur-sm flex items-center justify-center">
+    <div class="text-center">
+      <div class="text-5xl font-extrabold text-white drop-shadow mb-4 animate-pulse">
+        🚨 VIOLENCE DETECTED 🚨
+      </div>
+      <p class="text-white/90 text-lg">Monitoring paused visually for emphasis. Press <kbd class="px-2 py-1 bg-white/20 rounded">M</kbd> to mute/unmute siren.</p>
+    </div>
+  </div>
+
+  <script>
+    const FRAME_WIDTH = 640;
+    const FRAME_HEIGHT = 480;
+
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const alertBox = document.getElementById("alert");
+    const overlay = document.getElementById("overlay");
+    const siren = document.getElementById("siren");
+    const srLive = document.getElementById("sr-live");
+
+    let wasViolence = false;
+    let muted = false;
+
+    // Camera
+    navigator.mediaDevices.getUserMedia({ video: { width: FRAME_WIDTH, height: FRAME_HEIGHT } })
+      .then(stream => video.srcObject = stream)
+      .catch(err => {
+        srLive.textContent = "Camera permission denied or unavailable.";
+        console.error(err);
+      });
+
+    // WebSocket
+    const ws = new WebSocket(`ws://${location.host}/ws`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const isViolence = !!data.violence;
+
+      // Visual alerts
+      if (isViolence) {
+        alertBox.classList.remove("hidden");
+        overlay.classList.remove("hidden");
+
+        if (!wasViolence) {
+          // Play siren once on transition
+          if (!muted) {
+            try { siren.currentTime = 0; siren.play(); } catch {}
+          }
+          // Haptic + SR
+          if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+          srLive.textContent = "Alert: Violence detected.";
+        }
+        wasViolence = true;
+      } else {
+        alertBox.classList.add("hidden");
+        overlay.classList.add("hidden");
+        if (wasViolence) srLive.textContent = "Status: Clear.";
+        wasViolence = false;
+      }
+
+      // Draw received frame at fixed size
+      const img = new Image();
+      img.src = data.image;
+      img.onload = () => {
+        canvas.width = FRAME_WIDTH;
+        canvas.height = FRAME_HEIGHT;
+        ctx.drawImage(img, 0, 0, FRAME_WIDTH, FRAME_HEIGHT);
+      };
+    };
+
+    // Send frames @ ~10 FPS
+    setInterval(() => {
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCanvas.width = FRAME_WIDTH;
+      tempCanvas.height = FRAME_HEIGHT;
+      tempCtx.drawImage(video, 0, 0, FRAME_WIDTH, FRAME_HEIGHT);
+      ws.send(tempCanvas.toDataURL("image/jpeg", 0.5));
+    }, 100);
+
+    // Keyboard: M to mute/unmute siren
+    window.addEventListener("keydown", (e) => {
+      if (e.key.toLowerCase() === "m") {
+        muted = !muted;
+        if (muted) { try { siren.pause(); } catch {} }
+        srLive.textContent = muted ? "Siren muted." : "Siren unmuted.";
+      }
+    });
+  </script>
+</body>
+</html>
