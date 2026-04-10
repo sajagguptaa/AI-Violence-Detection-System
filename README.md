@@ -1,12 +1,12 @@
 
-# AI Violence Detection System 🔍
+# AI Violence Detection System 
 
 A real-time **violence detection system** built using **YOLOv8, OpenCV, and FastAPI**.  
 The project uses a webcam as input, performs inference through a trained YOLO model, and streams live annotated video in a browser-based interface.  
 
 ---
 
-## 🚀 Features
+## Features
 - Real-time violence detection using YOLOv8.
 - Webcam-based live video feed with bounding box annotations.
 - Accessible web interface (FastAPI + HTML + JavaScript).
@@ -16,7 +16,7 @@ The project uses a webcam as input, performs inference through a trained YOLO mo
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 
 AI-Violence-Detection-System/
@@ -30,7 +30,7 @@ AI-Violence-Detection-System/
 
 ---
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 ### 1. Clone the Repository
 
@@ -54,7 +54,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 
-> ⚠️ Install PyTorch manually (CPU or CUDA version) from [pytorch.org](https://pytorch.org/get-started/locally/).
+> Install PyTorch manually (CPU or CUDA version) from [pytorch.org](https://pytorch.org/get-started/locally/).
 
 ### 4. Add YOLO Model
 
@@ -65,7 +65,7 @@ AI-Violence-Detection-System/ViolenceDetection.pt
 
 ---
 
-## ▶️ Run the Application
+## Run the Application
 
 python launcher.py
 
@@ -73,7 +73,7 @@ Then open your browser at: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
 ---
 
-## 📦 Build Executable (Windows)
+## Build Executable (Windows)
 
 Using PowerShell:
 ./scripts/build_windows.ps1
@@ -85,7 +85,7 @@ The executable will be created in the `dist/` folder as `launcher.exe`.
 
 ---
 
-## 🛠 Troubleshooting
+## Troubleshooting
 
 * **Black Screen:** Close other apps using the webcam or try `CAM_INDEX=1 python launcher.py`.
 * **Model Not Found:** Ensure `ViolenceDetection.pt` exists in the root folder.
@@ -93,7 +93,7 @@ The executable will be created in the `dist/` folder as `launcher.exe`.
 
 ---
 
-## 📖 Tech Stack
+## Tech Stack
 
 * **YOLOv8** (Ultralytics)
 * **OpenCV**
@@ -103,13 +103,13 @@ The executable will be created in the `dist/` folder as `launcher.exe`.
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License** – free to use and modify.
 
 ---
 
-## ✨ Credits
+## Credits
 
 * Internship Project by **Sajag Gupta**
 * YOLOv8 by [Ultralytics](https://github.com/ultralytics/ultralytics)
